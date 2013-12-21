@@ -10,7 +10,7 @@
  * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that itadd_extension_menu_items will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -5510,16 +5510,26 @@ add_extension_menu_items (NemoView *view,
 	ui_manager = nemo_window_get_ui_manager (view->details->window);
 	
 	for (l = menu_items; l; l = l->next) {
+		GtkUIManagerItemType menu_type;
 		NemoMenuItem *item;
 		NemoMenu *menu;
 		GtkAction *action;
-		char *path;
+		char *path, *label;
 		
 		item = NEMO_MENU_ITEM (l->data);
 		
-		g_object_get (item, "menu", &menu, NULL);
+		g_object_get (item,
+			      "menu", &menu,
+			      "label", &label,
+			      NULL);
 		
 		action = add_extension_action_for_files (view, item, files);
+		
+		if ((label)&&(strcmp(label, "-") == 0)) {
+			menu_type = GTK_UI_MANAGER_SEPARATOR;
+		} else {
+			menu_type = (menu != NULL) ? GTK_UI_MANAGER_MENU : GTK_UI_MANAGER_MENUITEM;
+		}
 		
 		path = g_build_path ("/", NEMO_VIEW_POPUP_PATH_EXTENSION_ACTIONS, subdirectory, NULL);
 		gtk_ui_manager_add_ui (ui_manager,
@@ -5527,7 +5537,7 @@ add_extension_menu_items (NemoView *view,
 				       path,
 				       gtk_action_get_name (action),
 				       gtk_action_get_name (action),
-				       (menu != NULL) ? GTK_UI_MANAGER_MENU : GTK_UI_MANAGER_MENUITEM,
+				       menu_type,
 				       FALSE);
 		g_free (path);
 
@@ -5537,7 +5547,7 @@ add_extension_menu_items (NemoView *view,
 				       path,
 				       gtk_action_get_name (action),
 				       gtk_action_get_name (action),
-				       (menu != NULL) ? GTK_UI_MANAGER_MENU : GTK_UI_MANAGER_MENUITEM,
+				       menu_type,
 				       FALSE);
 		g_free (path);
 
